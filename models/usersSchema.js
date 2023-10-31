@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    verified_status: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -22,4 +26,5 @@ const userSchema = new mongoose.Schema(
 userSchema.plugin(passportLocalMongoose, {
   usernameField: "email",
 });
+
 module.exports = mongoose.model("User", userSchema);
