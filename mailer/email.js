@@ -1,7 +1,16 @@
+const hbs = require("nodemailer-express-handlebars");
 const nodemailer = require("nodemailer");
 const path = require("path");
 
-const sendEmail = async (email, subject, template) => {
+const handlebarOptions = {
+  viewEngine: {
+    partialsDir: path.resolve("./mailer/templates/"),
+    defaultLayout: false,
+  },
+  viewPath: path.resolve("./mailer/templates/"),
+};
+
+const sendEmail = async (email, subject, template, link) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -10,11 +19,15 @@ const sendEmail = async (email, subject, template) => {
         pass: process.env.PASS,
       },
     });
+    transporter.use("compile", hbs(handlebarOptions));
     await transporter.sendMail({
       from: process.env.USER,
       to: email,
       subject: subject,
       template: template,
+      context: {
+        link: link,
+      },
     });
     console.log("email sent sucessfully");
   } catch (error) {
