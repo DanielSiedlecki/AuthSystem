@@ -1,5 +1,5 @@
 const User = require("../models/usersSchema");
-const Token = require("../models/token");
+const Token = require("../models/tokenSchema");
 const jsonwebtoken = require("jsonwebtoken");
 const crypto = require("crypto");
 const sendEmail = require("../mailer/email");
@@ -16,7 +16,7 @@ const createUser = async (req, res) => {
     }).save();
 
     const message = `${process.env.BASE_URL}/user/verify/${user.id}/${token.token}`;
-    await sendEmail(user.email, "Verify Email", message);
+    await sendEmail(user.email, "Verify Email", "confirmAccount", message);
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     res
@@ -28,14 +28,22 @@ const createUser = async (req, res) => {
 
 const verifyUser = async (req, res) => {
   try {
+    if (req.params.id.length != 24) return res.status(400).send("Invalid link");
+
+    const user = await User.findOne({
+      _id: req.params.id,
+    });
+
+    if (!user) return res.status(400).send("Invalid link");
+
     const token = await Token.findOne({
-      userId: user._id,
+      userId: req.params.id,
       token: req.params.token,
     });
-    await User.findOneAndUpdate(
-      { _id: req.params.id },
-      { verified_status: true }
-    );
+
+    if (!token) return res.status(400).send("Invalid link");
+
+    await User.findOneAndUpdate({ _id: user._id }, { verified_status: true });
     await Token.findByIdAndRemove(token._id);
     res.send("email verified sucessfully");
   } catch (error) {
