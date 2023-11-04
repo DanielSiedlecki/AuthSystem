@@ -15,5 +15,11 @@ router.post(
   passport.authenticate("local", { session: false }),
   authController.loginUser
 );
-
+router.get("/facebook", passport.authenticate("facebook", { session: false }));
+router.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", (req, res) => {
+    res.send("Sukces");
+  })
+);
 module.exports = router;
