@@ -80,7 +80,9 @@ const loginFacebook = function (req, res, next) {
         id: user._id,
         email: user.email,
       };
-      const token = jsonwebtoken.sign(payload, process.env.JWT_KEY);
+      const token = jsonwebtoken.sign(payload, process.env.JWT_KEY, {
+        expiresIn: 3600,
+      });
 
       res.status(201).json({ message: "Login succes", token });
     });
