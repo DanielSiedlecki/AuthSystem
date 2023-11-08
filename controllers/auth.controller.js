@@ -55,7 +55,11 @@ const verifyUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const token = jsonwebtoken.sign({ id: req.user.id }, process.env.JWT_KEY, {
+    var payload = {
+      id: req.user.id,
+    };
+
+    const token = jsonwebtoken.sign(payload, process.env.JWT_KEY, {
       expiresIn: 3600,
     });
 
@@ -78,7 +82,6 @@ const loginFacebook = function (req, res, next) {
       }
       var payload = {
         id: user._id,
-        email: user.email,
       };
       const token = jsonwebtoken.sign(payload, process.env.JWT_KEY, {
         expiresIn: 3600,
