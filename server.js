@@ -4,6 +4,7 @@ const cors = require("cors");
 const app = express();
 const connectDB = require("./config/dbConnection");
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 const PORT = process.env.PORT || serverConfig.port;
 const passportConfig = require("./config/passport.js");
 const passport = require("passport");
@@ -28,6 +29,7 @@ app.use(
 );
 
 app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
 
 connectDB();
 
