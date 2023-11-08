@@ -46,7 +46,7 @@ const verifyUser = async (req, res) => {
 
     await User.findOneAndUpdate({ _id: user._id }, { verified_status: true });
     await Token.findByIdAndRemove(token._id);
-    res.send("email verified sucessfully");
+    res.send("Email verified sucessfully");
   } catch (error) {
     const user = await User.findOne({ _id: req.params.id });
     res.status(400).send("Error");
