@@ -3,6 +3,7 @@ const Token = require("../models/tokenSchema");
 const jsonwebtoken = require("jsonwebtoken");
 const crypto = require("crypto");
 const sendEmail = require("../mailer/email");
+const passport = require("passport");
 
 const createUser = async (req, res) => {
   try {
@@ -49,8 +50,6 @@ const verifyUser = async (req, res) => {
   } catch (error) {
     const user = await User.findOne({ _id: req.params.id });
     res.status(400).send("Error");
-    console.log(user._id);
-    console.log(error);
   }
 };
 
@@ -61,14 +60,36 @@ const loginUser = async (req, res) => {
     });
 
     res.status(201).json({ message: "Login succes", token });
+    console.log(token);
   } catch (error) {
     res.status(500);
     console.log(error);
   }
 };
 
+const loginFacebook = function (req, res, next) {
+  passport.authenticate("facebook", { session: false }, (err, user, info) => {
+    if (err || !user) {
+      return res.redirect(console.log("error"));
+    }
+    req.login(user, { session: false }, (err) => {
+      if (err) {
+        res.status(400).send({ err });
+      }
+      var payload = {
+        id: user._id,
+        email: user.email,
+      };
+      const token = jsonwebtoken.sign(payload, process.env.JWT_KEY);
+
+      res.status(201).json({ message: "Login succes", token });
+    });
+  })(req, res, next);
+};
+
 module.exports = {
   createUser,
   verifyUser,
   loginUser,
+  loginFacebook,
 };
