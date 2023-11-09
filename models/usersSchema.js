@@ -4,6 +4,7 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const userSchema = new mongoose.Schema(
   {
     facebook_id: String,
+    google_id: String,
     name: {
       type: mongoose.Schema.Types.Mixed,
       trim: true,
