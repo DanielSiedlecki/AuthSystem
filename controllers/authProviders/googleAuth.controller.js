@@ -10,7 +10,6 @@ function configureGoogleStrategy(passport) {
         callbackURL: process.env.GOOGLE_REDIRECT_URI,
       },
       function (accessToken, refreshToken, profile, cb) {
-        console.log("profil;", profile.emails);
         process.nextTick(async function () {
           try {
             const localuser = await User.findOne({
