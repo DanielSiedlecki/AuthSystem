@@ -10,8 +10,35 @@ function configureGoogleStrategy(passport) {
         callbackURL: process.env.GOOGLE_REDIRECT_URI,
       },
       function (accessToken, refreshToken, profile, cb) {
-        return db(err, user);
+        console.log("profil;", profile.emails);
+        process.nextTick(async function () {
+          try {
+            const localuser = await User.findOne({
+              email: profile.emails[0].value,
+            });
+
+            if (localuser) {
+              console.log("User Found");
+              cb(null, profile);
+            } else {
+              let new_user = {
+                google_id: profile.id,
+                email: profile.emails[0].value,
+                name: profile.displayName,
+              };
+
+              const newUser = await new User(new_user).save();
+              cb(null, newUser);
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        });
       }
     )
   );
 }
+
+module.exports = {
+  configureGoogleStrategy,
+};
