@@ -80,6 +80,9 @@ const loginFacebook = function (req, res, next) {
       if (err) {
         res.status(400).send({ err });
       }
+      if (!user) {
+        res.status(201).json({ message: "Error" });
+      }
       var payload = {
         id: user._id,
       };
@@ -92,9 +95,35 @@ const loginFacebook = function (req, res, next) {
   })(req, res, next);
 };
 
+const loginGmail = function (req, res, next) {
+  passport.authenticate(
+    "google",
+    { scope: ["email", "profile"] },
+    (err, profile) => {
+      if (err) {
+        console.log(err);
+      }
+
+      if (!profile) {
+        res.status(201).json({ message: "Error" });
+      }
+
+      var payload = {
+        id: profile._id,
+      };
+
+      const token = jsonwebtoken.sign(payload, process.env.JWT_KEY, {
+        expiresIn: 3600,
+      });
+
+      res.status(201).json({ message: "Login succes", token });
+    }
+  )(req, res, next);
+};
 module.exports = {
   createUser,
   verifyUser,
   loginUser,
   loginFacebook,
+  loginGmail,
 };
