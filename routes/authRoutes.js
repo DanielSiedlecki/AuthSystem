@@ -20,4 +20,16 @@ router.get(
   passport.authenticate("facebook", { scope: ["email"] })
 );
 router.get("/facebook/callback", authController.loginFacebook);
+
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: [
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+    ],
+  })
+);
+
+router.get("/google/callback", authController.loginGmail);
 module.exports = router;
