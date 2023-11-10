@@ -8,22 +8,20 @@ function configureLocalStrategy(passport) {
         usernameField: "email",
         passwordField: "password",
       },
-      function (username, password, done) {
-        process.nextTick(async function () {
-          try {
-            const localuser = await User.authenticate()(username, password);
+      async function (username, password, done) {
+        try {
+          const localuser = await User.authenticate()(username, password);
 
-            if (!localuser) {
-              console.log("nie dziala");
-              return done(null, false);
-            }
-            console.log("User Found");
-            return done(null, localuser);
-          } catch (err) {
-            console.error(err);
-            return done(err);
+          if (!localuser) {
+            return done(null, false);
           }
-        });
+
+          console.log("User Found");
+          return done(null, localuser);
+        } catch (err) {
+          console.error(err);
+          return done(err);
+        }
       }
     )
   );

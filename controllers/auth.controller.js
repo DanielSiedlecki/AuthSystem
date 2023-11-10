@@ -4,11 +4,15 @@ const jsonwebtoken = require("jsonwebtoken");
 const crypto = require("crypto");
 const sendEmail = require("../mailer/email");
 const passport = require("passport");
+const speakeasy = require("speakeasy");
+const QRCode = require("qrcode");
 
 const createUser = async (req, res) => {
   try {
+    const secret = await speakeasy.generateSecret();
+
     const { name, email, password } = req.body;
-    const user = new User({ name, email });
+    const user = new User({ name, email, secretKey: secret.base32 });
     await User.register(user, password);
 
     const token = await new Token({
@@ -16,9 +20,14 @@ const createUser = async (req, res) => {
       token: crypto.randomBytes(32).toString("hex"),
     }).save();
 
+    const qr_code = "";
+    const data_url = await QRCode.toDataURL(secret.otpauth_url);
+
     const message = `${process.env.BASE_URL}/user/verify/${user.id}/${token.token}`;
     await sendEmail(user.email, "Verify Email", "confirmAccount", message);
-    res.status(201).json({ message: "User created successfully" });
+    const htmlResponse = `<html><body><img src="${data_url}"> User created</body></html>`;
+
+    res.status(201).send(htmlResponse);
   } catch (error) {
     res
       .status(500)
@@ -65,6 +74,20 @@ const loginUser = async (req, res, next) => {
       if (!user) {
         res.status(201).json({ message: "Error" });
       }
+
+      const userSecretKey = user.user.secretKey;
+      const secretKey = req.body.secretKey;
+
+      const verified = speakeasy.totp.verify({
+        secret: userSecretKey,
+        encoding: "base32",
+        token: secretKey,
+      });
+
+      if (!verified) {
+        return res.status(401).send("Invalid secretKey");
+      }
+
       var payload = {
         id: user._id,
       };
