@@ -12,7 +12,7 @@ require("dotenv").config();
 
 app.use(
   require("express-session")({
-    secret: "secret",
+    secret: process.env.SESSION_SECRET_KEY,
     resave: true,
     saveUninitialized: true,
   })
@@ -20,6 +20,7 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+
 passportConfig();
 app.use(
   cors({
