@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    secretKey: {
+      type: String,
+      default: "",
+    },
     verified_status: {
       type: Boolean,
       default: false,
