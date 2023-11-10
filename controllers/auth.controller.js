@@ -53,22 +53,28 @@ const verifyUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {
-  try {
-    var payload = {
-      id: req.user.id,
-    };
+const loginUser = async (req, res, next) => {
+  passport.authenticate("local", { session: false }, (err, user, info) => {
+    if (err || !user) {
+      return res.redirect(console.log("error"));
+    }
+    req.login(user, { session: false }, (err) => {
+      if (err) {
+        res.status(400).send({ err });
+      }
+      if (!user) {
+        res.status(201).json({ message: "Error" });
+      }
+      var payload = {
+        id: user._id,
+      };
+      const token = jsonwebtoken.sign(payload, process.env.JWT_KEY, {
+        expiresIn: 3600,
+      });
 
-    const token = jsonwebtoken.sign(payload, process.env.JWT_KEY, {
-      expiresIn: 3600,
+      res.status(201).json({ message: "Login succes", token });
     });
-
-    res.status(201).json({ message: "Login succes", token });
-    console.log(token);
-  } catch (error) {
-    res.status(500);
-    console.log(error);
-  }
+  })(req, res, next);
 };
 
 const loginFacebook = function (req, res, next) {

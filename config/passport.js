@@ -6,10 +6,12 @@ const {
 const {
   configureGoogleStrategy,
 } = require("../controllers/authProviders/googleAuth.controller");
-
+const {
+  configureLocalStrategy,
+} = require("../controllers/authProviders/localAuth.controller");
 module.exports = () => {
   passport.use(User.createStrategy());
-
+  configureLocalStrategy(passport);
   configureFacebookStrategy(passport);
   configureGoogleStrategy(passport);
   passport.serializeUser(function (user, done) {

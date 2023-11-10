@@ -12,13 +12,15 @@ router.get("/user/verify/:id/:token", jsonParser, authController.verifyUser);
 router.post(
   "/login",
   jsonParser,
-  passport.authenticate("local", { session: false }),
+  passport.authenticate("local"),
   authController.loginUser
 );
+
 router.get(
   "/facebook",
   passport.authenticate("facebook", { scope: ["email"] })
 );
+
 router.get("/facebook/callback", authController.loginFacebook);
 
 router.get(
