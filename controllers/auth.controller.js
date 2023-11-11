@@ -6,7 +6,6 @@ const sendEmail = require("../mailer/email");
 const passport = require("passport");
 const speakeasy = require("speakeasy");
 const QRCode = require("qrcode");
-const bcrypt = require("bcrypt");
 
 const createUser = async (req, res) => {
   try {
