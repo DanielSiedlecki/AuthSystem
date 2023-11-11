@@ -6,6 +6,7 @@ const sendEmail = require("../mailer/email");
 const passport = require("passport");
 const speakeasy = require("speakeasy");
 const QRCode = require("qrcode");
+const bcrypt = require("bcrypt");
 
 const createUser = async (req, res) => {
   try {
@@ -20,18 +21,62 @@ const createUser = async (req, res) => {
       token: crypto.randomBytes(32).toString("hex"),
     }).save();
 
-    const qr_code = "";
     const data_url = await QRCode.toDataURL(secret.otpauth_url);
 
     const message = `${process.env.BASE_URL}/user/verify/${user.id}/${token.token}`;
     await sendEmail(user.email, "Verify Email", "confirmAccount", message);
-    const htmlResponse = `<html><body><img src="${data_url}"> User created</body></html>`;
 
+    const htmlResponse = `<html><body><img src="${data_url}"> User created</body></html>`;
     res.status(201).send(htmlResponse);
   } catch (error) {
     res
       .status(500)
       .json({ error: "An error occurred while creating the user" });
+    console.log(error);
+  }
+};
+
+const ForgotPasswordRequest = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    const token = await new Token({
+      userId: user._id,
+      token: crypto.randomBytes(32).toString("hex"),
+    }).save();
+
+    if (user) {
+      const message = `${process.env.BASE_URL}/user/changepassword/${user.id}/${token.token}`;
+
+      await sendEmail(user.email, "Change Password", "forgotPassword", message);
+
+      res.status(200).json({ message: "Email sended" });
+    } else {
+      res.status(400).json({ message: "Email is not registered", token });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const changeForgotPassword = async (req, res) => {
+  try {
+    if (req.params.id.length != 24) return res.status(400).send("Invalid link");
+    const user = await User.findOne({
+      _id: req.params.id,
+    });
+    if (!user) return res.status(400).send("Invalid link");
+    const token = await Token.findOne({
+      userId: req.params.id,
+      token: req.params.token,
+    });
+    if (!token) return res.status(400).send("Invalid link");
+
+    user.setPassword(req.body.newPassword, async () => {
+      await user.save();
+    });
+    await Token.findByIdAndRemove(token._id);
+    res.send("Password changed");
+  } catch (error) {
     console.log(error);
   }
 };
@@ -57,7 +102,6 @@ const verifyUser = async (req, res) => {
     await Token.findByIdAndRemove(token._id);
     res.send("Email verified sucessfully");
   } catch (error) {
-    const user = await User.findOne({ _id: req.params.id });
     res.status(400).send("Error");
   }
 };
@@ -155,4 +199,6 @@ module.exports = {
   loginUser,
   loginFacebook,
   loginGmail,
+  ForgotPasswordRequest,
+  changeForgotPassword,
 };

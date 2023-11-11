@@ -6,8 +6,18 @@ const passport = require("passport");
 var jsonParser = bodyParser.json();
 
 router.post("/register", jsonParser, authController.createUser);
+router.post(
+  "/forgotpassword",
+  jsonParser,
+  authController.ForgotPasswordRequest
+);
 
 router.get("/user/verify/:id/:token", jsonParser, authController.verifyUser);
+router.put(
+  "/user/changepassword/:id/:token",
+  jsonParser,
+  authController.changeForgotPassword
+);
 
 router.post(
   "/login",
