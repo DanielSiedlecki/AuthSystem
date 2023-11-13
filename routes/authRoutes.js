@@ -43,5 +43,7 @@ router.get(
   })
 );
 
+router.get("/logout", authController.logout);
+
 router.get("/google/callback", authController.loginGmail);
 module.exports = router;

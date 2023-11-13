@@ -192,6 +192,15 @@ const loginGmail = function (req, res, next) {
     }
   )(req, res, next);
 };
+
+const logout = function (req, res, next) {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/auth/login");
+  });
+};
 module.exports = {
   createUser,
   verifyUser,
@@ -200,4 +209,5 @@ module.exports = {
   loginGmail,
   ForgotPasswordRequest,
   changeForgotPassword,
+  logout,
 };
