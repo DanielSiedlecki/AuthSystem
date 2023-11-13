@@ -5,13 +5,14 @@ const app = express();
 const connectDB = require("./config/dbConnection");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const PORT = process.env.PORT || serverConfig.port;
 const passportConfig = require("./config/passport.js");
 const passport = require("passport");
+const expressSession = require("express-session");
 require("dotenv").config();
 
+const PORT = process.env.PORT || serverConfig.port;
 app.use(
-  require("express-session")({
+  expressSession({
     secret: process.env.SESSION_SECRET_KEY,
     resave: true,
     saveUninitialized: true,

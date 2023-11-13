@@ -9,30 +9,28 @@ function configureGoogleStrategy(passport) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: process.env.GOOGLE_REDIRECT_URI,
       },
-      function (accessToken, refreshToken, profile, cb) {
-        process.nextTick(async function () {
-          try {
-            const localuser = await User.findOne({
+      async function (accessToken, refreshToken, profile, cb) {
+        try {
+          const localuser = await User.findOne({
+            email: profile.emails[0].value,
+          });
+
+          if (localuser) {
+            console.log("User Found");
+            cb(null, profile);
+          } else {
+            let new_user = {
+              google_id: profile.id,
               email: profile.emails[0].value,
-            });
+              name: profile.displayName,
+            };
 
-            if (localuser) {
-              console.log("User Found");
-              cb(null, profile);
-            } else {
-              let new_user = {
-                google_id: profile.id,
-                email: profile.emails[0].value,
-                name: profile.displayName,
-              };
-
-              const newUser = await new User(new_user).save();
-              cb(null, newUser);
-            }
-          } catch (error) {
-            console.log(error);
+            const newUser = await new User(new_user).save();
+            cb(null, newUser);
           }
-        });
+        } catch (error) {
+          console.log(error);
+        }
       }
     )
   );
